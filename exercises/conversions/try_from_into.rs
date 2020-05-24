@@ -21,21 +21,21 @@ struct Person {
 // 1. If the length of the provided string is 0, then return an error
 // 2. Split the given string on the commas present in it
 // 3. Extract the first element from the split operation and use it as the name
-// 4. Extract the other element from the split operation and parse it into a `usize` as the age
+// 4. If the name is empty, then return an error.
+// 5. Extract the other element from the split operation and parse it into a `usize` as the age
 // If while parsing the age, something goes wrong, then return an error
 // Otherwise, then return a Result of a Person object
 impl TryFrom<&str> for Person {
     type Error = String;
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         if s.is_empty() {
-            Err("empty".to_string())
+            Err("empty error".to_string())
         } else {
             let t: Vec<&str> = s.split(",").collect();
+            if t.len() < 2 || t[0].is_empty() || t[1].is_empty() {
+                return Err("parse error".to_string()) 
+            }
             let t_age = t[1].parse::<usize>();
-            //let t_age = match t_age {
-            //    Ok(x) => x.unwrap(),
-            //    Err(_) => Err("wrong num"),
-            //};
             Ok(Person{
                 name: t[0].to_string(),
                 age: t_age.unwrap(),
@@ -58,7 +58,7 @@ mod tests {
     use super::*;
     #[test]
     fn test_bad_convert() {
-        // Test that John is returned when bad string is provided
+        // Test that error is returned when bad string is provided
         let p = Person::try_from("");
         assert!(p.is_err());
     }
@@ -80,5 +80,35 @@ mod tests {
     #[should_panic]
     fn test_panic_bad_age() {
         let p = Person::try_from("Mark,twenty").unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_missing_comma_and_age() {
+        let _: Person = "Mark".try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_missing_age() {
+        let _: Person = "Mark,".try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_missing_name() {
+        let _ : Person = ",1".try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_missing_name_and_age() {
+        let _: Person = ",".try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_missing_name_and_invalid_age() {
+        let _: Person = ",one".try_into().unwrap();
     }
 }

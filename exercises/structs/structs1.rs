@@ -29,8 +29,9 @@ mod tests {
     #[test]
     fn tuple_structs() {
         // TODO: Instantiate a tuple struct!
-        let green = ("green", "#00FF00");
+        //let green = ("green", "#00FF00");
 
+        let green = ColorTupleStruct (String::from("green"), String::from("#00FF00"));
         assert_eq!(green.0, "green");
         assert_eq!(green.1, "#00FF00");
     }
